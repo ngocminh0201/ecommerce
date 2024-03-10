@@ -8,6 +8,7 @@ import {
   ShoppingCartOutlined
 
 } from '@ant-design/icons';
+import ButtonInputSearch from '../ButtonInputSearch/ButtonInputSearch';
 
 const HeaderComponent = () => {
   return (
@@ -18,16 +19,16 @@ const HeaderComponent = () => {
         </Col>
 
         <Col span={12}>
-          <Search
-            placeholder="input search text"
-            allowClear
-            enterButton="Search"
+          <ButtonInputSearch
             size="large"
+            bordered={false}
+            placeholder="input search text"
+            textButton="Tìm kiếm"
           // onSearch={onSearch}
           />
         </Col>
 
-        <Col span={6} style={{display: 'flex', gap: '20px'}}>
+        <Col span={6} style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
           <WapperHeaderAccount>
             <UserOutlined style={{ fontSize: '36px' }} />
             <div>
