@@ -11,7 +11,7 @@ const CardComponent = () => {
                 width: '200px',
                 height: '200px'
             }}
-            style={{
+            style={{    
                 width: 200,
             }}
             bodyStyle={{
