@@ -1,4 +1,4 @@
-import { Col } from 'antd'
+import { Badge, Col } from 'antd'
 import React from 'react'
 import { WapperHeaderAccount, WapperTextHeader, WapperTextHeaderSmall, WrapperHeader } from './style'
 import Search from 'antd/es/transfer/search'
@@ -40,7 +40,9 @@ const HeaderComponent = () => {
             </div>
           </WapperHeaderAccount>
           <div>
-            <ShoppingCartOutlined style={{ fontSize: '36px', color: '#fff' }} />
+            <Badge count={4} size='small'>
+              <ShoppingCartOutlined style={{ fontSize: '36px', color: '#fff' }} />
+            </Badge>
             <WapperTextHeaderSmall>Giỏ hàng</WapperTextHeaderSmall>
           </div>
         </Col>
