@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleNameProduct, WrapperCardStyle, WrapperDiscountText, WrapperPriceText, WrapperReport } from './style'
+import { StyleNameProduct, WrapperCardStyle, WrapperDiscountText, WrapperPriceText, WrapperReport, WrapperStyleTextSell } from './style'
 import { StarFilled } from '@ant-design/icons'
 import logo from '../../assets/images/logo.png'
 
@@ -35,7 +35,7 @@ const CardComponent = () => {
                         color: 'yellow'
                     }} />
                 </span>
-                <span> | Đã bán 1000+</span>
+                <WrapperStyleTextSell> | Đã bán 1000+</WrapperStyleTextSell>
                 
             </WrapperReport>
             <WrapperPriceText>
