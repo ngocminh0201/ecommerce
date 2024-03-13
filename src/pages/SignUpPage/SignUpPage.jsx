@@ -26,7 +26,7 @@ export const SignUpPage = () => {
       }}>
         <WrapperContainerLeft>
           <h1>Xin chào</h1>
-          <p>Đăng nhập và tạo tài khoản</p>
+          <p>Đăng ký tài khoản mới</p>
           <InputForm style={{ marginBottom: '10px' }} placeholder='abc@gmail.com' />
           <div style={{position: 'relative'}}> 
                 <span style={{
