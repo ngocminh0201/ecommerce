@@ -1,7 +1,6 @@
 import { Badge, Col } from 'antd'
 import React from 'react'
 import { WapperHeaderAccount, WapperTextHeader, WapperTextHeaderSmall, WrapperHeader } from './style'
-import Search from 'antd/es/transfer/search'
 import {
   UserOutlined,
   CaretDownOutlined,
@@ -9,8 +8,13 @@ import {
 
 } from '@ant-design/icons';
 import ButtonInputSearch from '../ButtonInputSearch/ButtonInputSearch';
+import { useNavigate } from 'react-router-dom';
 
 const HeaderComponent = () => {
+  const navigate = useNavigate()
+  const handleNavigateLogin = () => {
+    navigate('/sign-in')
+  }
   return (
     <div style={{width: '100%', background: 'rgb(26, 148, 255)', display: 'flex', justifyContent: 'center'}}>
       <WrapperHeader>
@@ -31,7 +35,7 @@ const HeaderComponent = () => {
         <Col span={6} style={{display: 'flex', gap: '54px', alignItems: 'center'}}>
           <WapperHeaderAccount>
             <UserOutlined style={{ fontSize: '30px' }} />
-            <div>
+            <div onClick={handleNavigateLogin} style={{cursor: 'pointer'}}>
               <WapperTextHeaderSmall>Đăng nhập/Đăng ký</WapperTextHeaderSmall>
               <div>
                 <WapperTextHeaderSmall>Tài khoản</WapperTextHeaderSmall>
