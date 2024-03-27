@@ -1,6 +1,6 @@
-import { Badge, Col } from 'antd'
-import React from 'react'
-import { WapperHeaderAccount, WapperTextHeader, WapperTextHeaderSmall, WrapperHeader } from './style'
+import { Badge, Button, Col, Popover } from 'antd'
+import React, { useState } from 'react'
+import { WapperHeaderAccount, WapperTextHeader, WapperTextHeaderSmall, WrapperContentPopup, WrapperHeader } from './style'
 import {
   UserOutlined,
   CaretDownOutlined,
@@ -9,7 +9,10 @@ import {
 } from '@ant-design/icons';
 import ButtonInputSearch from '../ButtonInputSearch/ButtonInputSearch';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import * as UserService from '../../services/UserService'
+import {resetUser} from '../../redux/slides/userSlide' 
+import Loading from '../LoadingComponent/Loading';
 
 const HeaderComponent = () => {
   const navigate = useNavigate()
@@ -18,7 +21,25 @@ const HeaderComponent = () => {
   }
 
   const user = useSelector((state) => state.user)
-  console.log('user', user)
+  // console.log('user', user)
+
+  const dispatch = useDispatch()
+  const [loading, setLoading] = useState(false)
+
+  const handleLogout = async () => {
+    setLoading(true)
+    await UserService.logoutUser()
+    dispatch(resetUser())
+    setLoading(false)
+  }
+
+
+  const content = (
+    <div>
+      <WrapperContentPopup onClick={handleLogout}>Đăng xuất</WrapperContentPopup>
+      <WrapperContentPopup>Thông tin người dùng</WrapperContentPopup>
+    </div>
+  );
 
   return (
     <div style={{width: '100%', background: 'rgb(26, 148, 255)', display: 'flex', justifyContent: 'center'}}>
@@ -38,20 +59,27 @@ const HeaderComponent = () => {
         </Col>
 
         <Col span={6} style={{display: 'flex', gap: '54px', alignItems: 'center'}}>
-          <WapperHeaderAccount>
-            <UserOutlined style={{ fontSize: '30px' }} />
-            {user?.name ? (
-              <div style={{cursor: 'pointer'}} >{user.name}</div>
-            ) : (
-              <div onClick={handleNavigateLogin} style={{cursor: 'pointer'}}>
-                <WapperTextHeaderSmall>Đăng nhập/Đăng ký</WapperTextHeaderSmall>
-                <div>
-                  <WapperTextHeaderSmall>Tài khoản</WapperTextHeaderSmall>
-                  <CaretDownOutlined />
+          <Loading isPending={loading}>
+            <WapperHeaderAccount>
+              <UserOutlined style={{ fontSize: '30px' }} />
+              {user?.name ? (
+                <>
+                  <Popover content={content} trigger="click">
+                    <div style={{cursor: 'pointer'}} >{user.name}</div>
+                  </Popover>
+                </>
+              ) : (
+                <div onClick={handleNavigateLogin} style={{cursor: 'pointer'}}>
+                  <WapperTextHeaderSmall>Đăng nhập/Đăng ký</WapperTextHeaderSmall>
+                  <div>
+                    <WapperTextHeaderSmall>Tài khoản</WapperTextHeaderSmall>
+                    <CaretDownOutlined />
+                  </div>
                 </div>
-              </div>
-            )}
-          </WapperHeaderAccount>
+              )}
+            </WapperHeaderAccount>
+          </Loading>
+          
           <div>
             <Badge count={4} size='small'>
               <ShoppingCartOutlined style={{ fontSize: '36px', color: '#fff' }} />

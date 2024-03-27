@@ -1,27 +1,52 @@
-import axios from 'axios'
 import React, { Fragment, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import {routes} from './routes'
 import DefaultComponent from './components/DefaultComponent/DefaultComponent'
-import { useQuery } from '@tanstack/react-query'
+import { isJsonString } from './utils'
+import { useDispatch } from 'react-redux'
+import { jwtDecode } from 'jwt-decode'
+import * as UserService from './services/UserService'
+import { updateUser } from './redux/slides/userSlide'
+import axios from 'axios'
 
 function App() {
-  
-  // useEffect (() => {
-  //   fetchApi()
-  // }, [])
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const {storageData, decoded} = handleDecoded()
+      if (decoded?.id) {
+        handleGetDetailsUser(decoded?.id, storageData)
+      }
+    // console.log('storageData', storageData)
+  }, [])
 
-  // console.log('REACT_API_URL_BACKEND: ', process.env.REACT_API_URL_BACKEND)
-
-  const fetchApi = async () => {
-    const res = await axios.get(`http://localhost:3001/api/product/get-all`)
-    return res.data
+  const handleDecoded = () => {
+    let storageData = localStorage.getItem('access_token')
+    let decoded = {}
+    if (storageData && isJsonString(storageData)) {
+      storageData = JSON.parse(storageData)
+      decoded = jwtDecode(storageData)
+    }
+    return {decoded, storageData}
   }
 
-  const query = useQuery({ queryKey: ['todos'], queryFn: fetchApi })
+  UserService.axiosJWT.interceptors.request.use(async (config) => {
+    // Do something before request is sent
+    const currentTime = new Date()
+    const {decoded} = handleDecoded()
+    if (decoded?.exp < currentTime.getTime() / 1000) {
+      const data = await UserService.refreshToken()
+      config.headers['token'] = `Bearer ${data?.access_token}`
+    }
+    return config;
+  }, function (error) {
+    return Promise.reject(error);
+  });
 
-  // console.log('query', query)
-
+  const handleGetDetailsUser = async (id, token) => {
+    const res = await UserService.getDetailsUser(id, token)
+    dispatch(updateUser({ ...res?.data, access_token: token }))
+    // console.log('res', res)
+  }
   return (
     <div>
       <Router>
