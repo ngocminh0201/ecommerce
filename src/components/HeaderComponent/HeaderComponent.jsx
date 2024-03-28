@@ -1,5 +1,5 @@
-import { Badge, Button, Col, Popover } from 'antd'
-import React, { useState } from 'react'
+import { Badge, Col, Popover } from 'antd'
+import React, { useEffect, useState } from 'react'
 import { WapperHeaderAccount, WapperTextHeader, WapperTextHeaderSmall, WrapperContentPopup, WrapperHeader } from './style'
 import {
   UserOutlined,
@@ -33,11 +33,20 @@ const HeaderComponent = () => {
     setLoading(false)
   }
 
+  const [userName, setUserName] = useState('')
+  const [userAvatar, setUserAvatar] = useState('')
+  useEffect(() => {
+    setLoading(true)
+    setUserName(user?.name)
+    setUserAvatar(user?.avatar)
+    setLoading(false)
+  }, [user?.name, user?.avatar])
+
 
   const content = (
     <div>
       <WrapperContentPopup onClick={handleLogout}>Đăng xuất</WrapperContentPopup>
-      <WrapperContentPopup>Thông tin người dùng</WrapperContentPopup>
+      <WrapperContentPopup onClick={() => navigate('/profile-user')}>Thông tin người dùng</WrapperContentPopup>
     </div>
   );
 
@@ -61,11 +70,21 @@ const HeaderComponent = () => {
         <Col span={6} style={{display: 'flex', gap: '54px', alignItems: 'center'}}>
           <Loading isPending={loading}>
             <WapperHeaderAccount>
-              <UserOutlined style={{ fontSize: '30px' }} />
-              {user?.name ? (
+              {userAvatar ? (
+                  <img src={userAvatar} alt='avatar' style={{
+                    height: '30px',
+                    width: '30px',
+                    borderRadius: '50%',
+                    objectFit: 'cover'
+                  }} />
+              ) : (
+                <UserOutlined style={{ fontSize: '30px' }} />
+
+              )}
+              {user?.access_token ? (
                 <>
                   <Popover content={content} trigger="click">
-                    <div style={{cursor: 'pointer'}} >{user.name}</div>
+                    <div style={{cursor: 'pointer'}} >{userName?.length ? userName : user?.email}</div>
                   </Popover>
                 </>
               ) : (
