@@ -1,21 +1,26 @@
-import React, { Fragment, useEffect } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import {routes} from './routes'
 import DefaultComponent from './components/DefaultComponent/DefaultComponent'
 import { isJsonString } from './utils'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { jwtDecode } from 'jwt-decode'
 import * as UserService from './services/UserService'
 import { updateUser } from './redux/slides/userSlide'
 import axios from 'axios'
+import Loading from './components/LoadingComponent/Loading'
 
 function App() {
   const dispatch = useDispatch();
+  const [isPending, setIsPending] = useState(false)
+  const user = useSelector((state) => state.user)
   useEffect(() => {
+    setIsPending(true)
     const {storageData, decoded} = handleDecoded()
       if (decoded?.id) {
         handleGetDetailsUser(decoded?.id, storageData)
       }
+      setIsPending(false)
     // console.log('storageData', storageData)
   }, [])
 
@@ -49,21 +54,25 @@ function App() {
   }
   return (
     <div>
-      <Router>
-        <Routes>
-          {routes.map((route) => {
-            const Page = route.page
-            const Layout = route.isShowHeader ? DefaultComponent : Fragment
-            return (
-              <Route key={route.path} path={route.path} element={
-                <Layout>
-                  <Page />
-                </Layout>
-              } />
-            )
-          })}
-        </Routes>
-      </Router>
+      <Loading isPending={isPending}>
+        <Router>
+          <Routes>
+            {routes.map((route) => {
+              const Page = route.page
+              const ischeckAuth = !route.isPrivated || user.isAdmin || ''
+              const Layout = route.isShowHeader ? DefaultComponent : Fragment
+              return (
+                <Route key={route.path} path={ischeckAuth && route.path} element={
+                  <Layout>
+                    <Page />
+                  </Layout>
+                } />
+              )
+            })}
+          </Routes>
+        </Router>
+      </Loading>
+      
     </div>
   )
 }

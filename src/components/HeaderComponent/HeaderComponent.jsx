@@ -14,7 +14,7 @@ import * as UserService from '../../services/UserService'
 import {resetUser} from '../../redux/slides/userSlide' 
 import Loading from '../LoadingComponent/Loading';
 
-const HeaderComponent = () => {
+const HeaderComponent = ({isHiddenSearch = false, isHiddenCart = false}) => {
   const navigate = useNavigate()
   const handleNavigateLogin = () => {
     navigate('/sign-in')
@@ -45,19 +45,22 @@ const HeaderComponent = () => {
 
   const content = (
     <div>
-      <WrapperContentPopup onClick={handleLogout}>Đăng xuất</WrapperContentPopup>
       <WrapperContentPopup onClick={() => navigate('/profile-user')}>Thông tin người dùng</WrapperContentPopup>
+      {user?.isAdmin && (
+          <WrapperContentPopup onClick={() => navigate('/system/admin')}>Quản lý hệ thống</WrapperContentPopup>
+      )}
+      <WrapperContentPopup onClick={handleLogout}>Đăng xuất</WrapperContentPopup>
     </div>
   );
 
   return (
     <div style={{width: '100%', background: 'rgb(26, 148, 255)', display: 'flex', justifyContent: 'center'}}>
-      <WrapperHeader>
+      <WrapperHeader style={{justifyContent: isHiddenSearch && isHiddenSearch ? 'space-between' : 'unset'}}>
         <Col span={5}>
           <WapperTextHeader>ECOMMERCE WEB</WapperTextHeader>
         </Col>
-
-        <Col span={13}>
+        {!isHiddenSearch && (
+          <Col span={13}>
           <ButtonInputSearch
             size="large"
             bordered={false}
@@ -65,8 +68,9 @@ const HeaderComponent = () => {
             textButton="Tìm kiếm"
           // onSearch={onSearch}
           />
-        </Col>
-
+         </Col>
+        )}
+        
         <Col span={6} style={{display: 'flex', gap: '54px', alignItems: 'center'}}>
           <Loading isPending={loading}>
             <WapperHeaderAccount>
@@ -99,12 +103,15 @@ const HeaderComponent = () => {
             </WapperHeaderAccount>
           </Loading>
           
-          <div>
-            <Badge count={4} size='small'>
-              <ShoppingCartOutlined style={{ fontSize: '36px', color: '#fff' }} />
-            </Badge>
-            <WapperTextHeaderSmall>Giỏ hàng</WapperTextHeaderSmall>
-          </div>
+          {!isHiddenCart && (
+            <div>
+              <Badge count={4} size='small'>
+                <ShoppingCartOutlined style={{ fontSize: '36px', color: '#fff' }} />
+              </Badge>
+              <WapperTextHeaderSmall>Giỏ hàng</WapperTextHeaderSmall>
+            </div>
+          )}
+          
         </Col>
       </WrapperHeader>
     </div>
