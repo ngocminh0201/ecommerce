@@ -8,7 +8,7 @@ import {EyeFilled, EyeInvisibleFilled} from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import * as UserService from '../../services/UserService'
 import * as message from '../../components/Message/Message'
-import { useMutaionHooks } from '../../hooks/useMutationHook'
+import { useMutationHooks } from '../../hooks/useMutationHook'
 import Loading from '../../components/LoadingComponent/Loading'
 import { jwtDecode } from 'jwt-decode'
 import { useDispatch } from 'react-redux'
@@ -22,7 +22,7 @@ const SignInPage = () => {
   const [password, setPassword] = useState('')
   const dispatch = useDispatch()
 
-  const mutation = useMutaionHooks(
+  const mutation = useMutationHooks(
     data => UserService.loginUser(data)
   )
 

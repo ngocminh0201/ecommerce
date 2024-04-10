@@ -6,7 +6,7 @@ import { Image } from 'antd'
 import imageLogo from '../../assets/images/logo-login.png'
 import {EyeFilled, EyeInvisibleFilled} from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { useMutaionHooks } from '../../hooks/useMutationHook'
+import { useMutationHooks } from '../../hooks/useMutationHook'
 import * as UserService from '../../services/UserService'
 import * as message from '../../components/Message/Message'
 import Loading from '../../components/LoadingComponent/Loading'
@@ -33,7 +33,7 @@ export const SignUpPage = () => {
     setConfirmPassword(value)
   }
 
-  const mutation = useMutaionHooks(
+  const mutation = useMutationHooks(
     data => UserService.signupUser(data)
   )
 

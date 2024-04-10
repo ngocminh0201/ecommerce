@@ -1,197 +1,144 @@
 import React, { useEffect, useState } from 'react'
-import { WrapperContentProfile, WrapperHeader, WrapperInput, WrapperLabel, WrapperUploadFile } from './style'
+import { WrapperContainerLeft, WrapperContainerRight, WrapperTextLight } from './style'
 import InputForm from '../../components/InputForm/InputForm'
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
-import { useDispatch, useSelector } from 'react-redux'
+import imageLogo from '../../assets/images/logo-login.png'
+import { Image } from 'antd'
+import {EyeFilled, EyeInvisibleFilled} from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
 import * as UserService from '../../services/UserService'
-import { useMutaionHooks } from '../../hooks/useMutationHook'
+import * as message from '../../components/Message/Message'
+import { useMutationHooks } from '../../hooks/useMutationHook'
 import Loading from '../../components/LoadingComponent/Loading'
-import { Button, message } from 'antd'
+import { jwtDecode } from 'jwt-decode'
+import { useDispatch } from 'react-redux'
 import { updateUser } from '../../redux/slides/userSlide'
-import { UploadOutlined } from '@ant-design/icons'
-import { getBase64 } from '../../utils'
 
-const ProfilePage = () => {
-    const user = useSelector((state) => state.user)
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
-    const [phone, setPhone] = useState('')
-    const [address, setAddress] = useState('')
-    const [avatar, setAvatar] = useState('')
-    const mutation = useMutaionHooks(
-        (data) => {
-            const {id, access_token, ...rests} = data
-            UserService.updateUser(id, rests, access_token)
+const SignInPage = () => {
+  const navigate = useNavigate()
+
+  const [isShowPassword, setIsShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const dispatch = useDispatch()
+
+  const mutation = useMutationHooks(
+    data => UserService.loginUser(data)
+  )
+
+  console.log('mutation', mutation)
+
+  const { data, isPending, isSuccess } = mutation
+
+  useEffect(() => {
+    if (isSuccess) {
+      navigate('/')
+      localStorage.setItem('access_token', JSON.stringify(data?.access_token))
+      if (data?.access_token) {
+        const decode = jwtDecode(data?.access_token)
+        // console.log('decode', decode)
+        if (decode?.id) {
+          handleGetDetailsUser(decode?.id, data?.access_token)
         }
-    )
-    const dispatch = useDispatch()
-    const {data, isPending, isSuccess, isError} = mutation
-
-    useEffect(() => {
-        setName(user?.name)
-        setEmail(user?.email)
-        setPhone(user?.phone)
-        setAddress(user?.address)
-        setAvatar(user?.avatar)
-    }, [user])
-
-    useEffect(() => {
-        if (isSuccess) {
-            message.success('Success')
-            handleGetDetailsUser(user?.id, user?.access_token)
-        } else if (isError) {
-            message.error('Error')
-        }
-    }, [isSuccess, isError])
-
-    const handleGetDetailsUser = async (id, token) => {
-        const res = await UserService.getDetailsUser(id, token)
-        dispatch(updateUser({ ...res?.data, access_token: token }))
       }
+    }
+  }, [isSuccess])
 
-    const handleOnchangeName = (value) => {
-        setName(value)
-    }
-    const handleOnchangeEmail = (value) => {
-        setEmail(value)
-    }
-    const handleOnchangePhone = (value) => {
-        setPhone(value)
-    }
-    const handleOnchangeAddress = (value) => {
-        setAddress(value)
-    }
-    const handleOnchangeAvatar = async ({fileList}) => {
-        const file = fileList[0]
-        if (!file.url && !file.preview) {
-            file.preview = await getBase64(file.originFileObj);
-        }
-        setAvatar(file.preview)
-    }
-    const handleUpdate = () => {
-        mutation.mutate({id: user?.id, name, email, phone, address, avatar, access_token: user?.access_token})
-    }
-    return (
-        <div style={{width: '1270px', margin: '0 auto', height: '500px'}}>
-            <WrapperHeader>Thông tin người dùng</WrapperHeader>
+  const handleGetDetailsUser = async (id, token) => {
+    const res = await UserService.getDetailsUser(id, token)
+    dispatch(updateUser({ ...res?.data, access_token: token }))
+    // console.log('res', res)
+  }
+
+  const handleNavigateSignUp = () => {
+    navigate('/sign-up')
+  }
+
+  const handleOnchangeEmail = (value) => {
+    setEmail(value)
+  }
+
+  const handleOnchangePassword = (value) => {
+    setPassword(value)
+  }
+
+  const handleSignIn = () => {
+    mutation.mutate({
+      email,
+      password
+    })
+    console.log('sign-in', email, password)
+  }
+  return (
+      <div style={{
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      background: 'rgba(0, 0, 0, 0.53)',
+                      height: '100vh'}}>
+        <div style={{
+                      width: '800px', 
+                      height: '445px', 
+                      borderRadius: '6px', 
+                      backgroundColor: '#fff',
+                      display: 'flex'}}>
+          <WrapperContainerLeft>
+            <h1>Xin chào</h1>
+            <p>Đăng nhập và tạo tài khoản</p>
+            <InputForm style={{marginBottom: '10px'}} placeholder='abc@gmail.com' 
+                        value={email} onChange={handleOnchangeEmail}/>
+            <div style={{position: 'relative'}}> 
+                <span 
+                  onClick={() => setIsShowPassword(!isShowPassword)}
+                  style={{
+                    zIndex: 10,
+                    position: 'absolute',
+                    top: '4px',
+                    right: '8px'
+                  }}> {
+                    isShowPassword ? (
+                      <EyeFilled />
+                    ) : (
+                      <EyeInvisibleFilled />
+                    )
+                  }
+                </span>
+                <InputForm placeholder='password' type={isShowPassword ? "text" : "password"} 
+                            value={password} onChange={handleOnchangePassword}/>
+            </div>
+            {data?.status === 'ERR' && <span style={{color: 'red'}}>{data?.message}</span>}
             <Loading isPending={isPending}>
-                <WrapperContentProfile>
-                    <WrapperInput>
-                        <WrapperLabel htmlFor="name">Name</WrapperLabel>
-                        <InputForm  style={{width: '300px'}} id="email" value={name} onChange={handleOnchangeName}/>
-                        <ButtonComponent
-                            onClick={handleUpdate}
-                            size={40}
-                            styleButton={{
-                                height: '30px',
-                                width: 'fit-content',
-                                borderRadius: '4px',
-                                padding: '2px 6px 6px'
-                            }}
-                            textButton={'Cập nhật'}
-                            styleTextButton={{
-                                color: 'rgb(26, 148, 255)',
-                                fontSize: '15px',
-                                fontWeight: '700'
-                            }}
-                        ></ButtonComponent>
-                    </WrapperInput>
-                    <WrapperInput>
-                        <WrapperLabel htmlFor="email">Email</WrapperLabel>
-                        <InputForm  style={{width: '300px'}} id="email" value={email} onChange={handleOnchangeEmail}/>
-                        <ButtonComponent
-                            onClick={handleUpdate}
-                            size={40}
-                            styleButton={{
-                                height: '30px',
-                                width: 'fit-content',
-                                borderRadius: '4px',
-                                padding: '2px 6px 6px'
-                            }}
-                            textButton={'Cập nhật'}
-                            styleTextButton={{
-                                color: 'rgb(26, 148, 255)',
-                                fontSize: '15px',
-                                fontWeight: '700'
-                            }}
-                        ></ButtonComponent>
-                    </WrapperInput>
-                    <WrapperInput>
-                        <WrapperLabel htmlFor="phone">Phone</WrapperLabel>
-                        <InputForm  style={{width: '300px'}} id="phone" value={phone} onChange={handleOnchangePhone}/>
-                        <ButtonComponent
-                            onClick={handleUpdate}
-                            size={40}
-                            styleButton={{
-                                height: '30px',
-                                width: 'fit-content',
-                                borderRadius: '4px',
-                                padding: '2px 6px 6px'
-                            }}
-                            textButton={'Cập nhật'}
-                            styleTextButton={{
-                                color: 'rgb(26, 148, 255)',
-                                fontSize: '15px',
-                                fontWeight: '700'
-                            }}
-                        ></ButtonComponent>
-                    </WrapperInput>
-                    <WrapperInput>
-                        <WrapperLabel htmlFor="address">Address</WrapperLabel>
-                        <InputForm  style={{width: '300px'}} id="address" value={address} onChange={handleOnchangeAddress}/>
-                        <ButtonComponent
-                            onClick={handleUpdate}
-                            size={40}
-                            styleButton={{
-                                height: '30px',
-                                width: 'fit-content',
-                                borderRadius: '4px',
-                                padding: '2px 6px 6px'
-                            }}
-                            textButton={'Cập nhật'}
-                            styleTextButton={{
-                                color: 'rgb(26, 148, 255)',
-                                fontSize: '15px',
-                                fontWeight: '700'
-                            }}
-                        ></ButtonComponent>
-                    </WrapperInput>
-                    <WrapperInput>
-                        <WrapperLabel htmlFor="avatar">Avatar</WrapperLabel>
-                        <WrapperUploadFile onChange={handleOnchangeAvatar} maxCount={1}>
-                            <Button icon={<UploadOutlined />}>Select File</Button>
-                        </WrapperUploadFile>
-                        {avatar && (
-                            <img src={avatar} style={{
-                                height: '60px',
-                                width: '60px',
-                                borderRadius: '50%',
-                                objectFit: 'cover'
-                            }} alt='avatar'/>
-                        )}
-                        {/* <InputForm  style={{width: '300px'}} id="avatar" value={avatar} onChange={handleOnchangeAvatar}/> */}
-                        <ButtonComponent
-                            onClick={handleUpdate}
-                            size={40}
-                            styleButton={{
-                                height: '30px',
-                                width: 'fit-content',
-                                borderRadius: '4px',
-                                padding: '2px 6px 6px'
-                            }}
-                            textButton={'Cập nhật'}
-                            styleTextButton={{
-                                color: 'rgb(26, 148, 255)',
-                                fontSize: '15px',
-                                fontWeight: '700'
-                            }}
-                        ></ButtonComponent>
-                    </WrapperInput>
-                </WrapperContentProfile>
+              <ButtonComponent
+                disabled={!email.length || !password.length }
+                onClick={handleSignIn}
+                size={40}
+                styleButton={{
+                    background: 'rgb(255, 57, 69)',
+                    height: '48px',
+                    width: '100%',
+                    border: 'none',
+                    borderRadius: '4px',
+                    margin: '26px 0 10px'
+                }}
+                textButton={'Đăng nhập'}
+                styleTextButton={{
+                    color: '#fff',
+                    fontSize: '15px',
+                    fontWeight: '700'
+                }}
+              ></ButtonComponent>
             </Loading>
             
+            <p><WrapperTextLight>Quên mật khẩu</WrapperTextLight></p>
+            <p>Chưa có tài khoản? <WrapperTextLight onClick={handleNavigateSignUp}>Tạo tài khoản</WrapperTextLight></p>
+          </WrapperContainerLeft>
+          <WrapperContainerRight>
+              <Image src={imageLogo} preview={false} alt='image-logo' width='203px' height='203px'/>
+              <h4>Mua sắm điểm cao :)))</h4>
+          </WrapperContainerRight>
         </div>
-    )
+      </div>
+  )
 }
 
-export default ProfilePage
+export default SignInPage
